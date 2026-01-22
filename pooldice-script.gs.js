@@ -214,6 +214,33 @@ function probabilidadeExatosSucessosSemCancelamento(n, lados, sucessosExatos) {
   return binomialPMF(sucessosExatos, n, p);
 }
 
+// ==================== SISTEMA 7: KEEP LOWEST COM STEP DICE (d6/d8/d10/d12) ====================
+
+/**
+ * Calcula a probabilidade de sucesso (1 sucesso) ao manter o menor valor de n dados.
+ * Sucesso ocorre quando o menor valor é ≥ 6 (todos os dados mostram ≥ 6).
+ * @param {number} n - Número de dados a rolar
+ * @param {number} lados - Número de lados do dado (6, 8, 10 ou 12)
+ * @returns {number} Probabilidade de sucesso (0 a 1)
+ * @customfunction
+ */
+function probabilidadeKeepLowestSucesso(n, lados) {
+  const p = getProbSucessoMultiDado(lados);
+  return Math.pow(p, n);
+}
+
+/**
+ * Calcula a probabilidade de fracasso (0 sucessos) ao manter o menor valor de n dados.
+ * Fracasso ocorre quando o menor valor é < 6.
+ * @param {number} n - Número de dados a rolar
+ * @param {number} lados - Número de lados do dado (6, 8, 10 ou 12)
+ * @returns {number} Probabilidade de fracasso (0 a 1)
+ * @customfunction
+ */
+function probabilidadeKeepLowestFracasso(n, lados) {
+  return 1 - probabilidadeKeepLowestSucesso(n, lados);
+}
+
 // ==================== FUNÇÕES AUXILIARES ====================
 function binomialPMF(k, n, p) {
   return Math.pow(p, k) * Math.pow(1 - p, n - k) * combinacao(n, k);
