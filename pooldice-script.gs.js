@@ -241,6 +241,43 @@ function probabilidadeKeepLowestFracasso(n, lados) {
   return 1 - probabilidadeKeepLowestSucesso(n, lados);
 }
 
+// ==================== SISTEMA 8: MÉDIA DE SUCESSOS COM CANCELAMENTO (d6/d8/d10/d12) ====================
+
+/**
+ * Calcula a média (esperança matemática) de sucessos líquidos de uma rolagem.
+ * Sucesso: resultado ≥ 6 | Cancelamento: resultado = 1 | Neutro: 2-5
+ * Sucessos líquidos = max(0, sucessos - cancelamentos)
+ * @param {number} n - Número de dados a rolar
+ * @param {number} lados - Número de lados do dado (6, 8, 10 ou 12)
+ * @returns {number} Média de sucessos líquidos
+ * @customfunction
+ */
+function mediaSucessosMultiDado(n, lados) {
+  if (n <= 0) return 0;
+
+  const probs = getProbabilidadesMultiDado(lados);
+  let mediaTotal = 0;
+
+  for (let s = 0; s <= n; s++) {
+    for (let c = 0; c <= n - s; c++) {
+      let neutros = n - s - c;
+      if (neutros < 0) continue;
+
+      let sucessosLiquidos = Math.max(0, s - c);
+
+      let probComb =
+        Math.pow(probs.sucesso, s) *
+        Math.pow(probs.cancela, c) *
+        Math.pow(probs.neutro, neutros) *
+        combinacaoMultinomial(n, s, c, neutros);
+
+      mediaTotal += sucessosLiquidos * probComb;
+    }
+  }
+
+  return mediaTotal;
+}
+
 // ==================== FUNÇÕES AUXILIARES ====================
 function binomialPMF(k, n, p) {
   return Math.pow(p, k) * Math.pow(1 - p, n - k) * combinacao(n, k);
