@@ -1,4 +1,15 @@
 // ==================== SISTEMA 1: COM CANCELAMENTOS ====================
+
+/**
+ * Calcula a probabilidade de obter pelo menos X sucessos líquidos em uma rolagem de dados d6.
+ * Sucesso: resultado >= threshold | Cancelamento: resultado = 1 | Neutro: resto
+ * Sucessos líquidos = max(0, sucessos - cancelamentos)
+ * @param {number} n - Número de dados a rolar
+ * @param {number} threshold - Valor mínimo para sucesso (2 a 6)
+ * @param {number} sucessosMinimos - Quantidade mínima de sucessos líquidos desejados
+ * @returns {number} Probabilidade de sucesso (0 a 1)
+ * @customfunction
+ */
 function probabilidadeSucessos(n, threshold, sucessosMinimos) {
   if (sucessosMinimos <= 0) return 1;
   if (sucessosMinimos > n) return 0;
@@ -31,6 +42,17 @@ function probabilidadeSucessos(n, threshold, sucessosMinimos) {
 }
 
 // ==================== SISTEMA 1.1: SUCESSOS EXATOS COM CANCELAMENTO ====================
+
+/**
+ * Calcula a probabilidade de obter exatamente X sucessos líquidos em uma rolagem de dados d6.
+ * Sucesso: resultado >= threshold | Cancelamento: resultado = 1 | Neutro: resto
+ * Sucessos líquidos = max(0, sucessos - cancelamentos)
+ * @param {number} n - Número de dados a rolar
+ * @param {number} threshold - Valor mínimo para sucesso (2 a 6)
+ * @param {number} sucessosExatos - Quantidade exata de sucessos líquidos desejados
+ * @returns {number} Probabilidade de obter exatamente esse número de sucessos (0 a 1)
+ * @customfunction
+ */
 function probabilidadeExatosSucessosComCancelamento(
   n,
   threshold,
@@ -65,10 +87,25 @@ function probabilidadeExatosSucessosComCancelamento(
   return total;
 }
 
+/**
+ * Calcula o coeficiente multinomial para distribuição de n elementos em 3 grupos.
+ * @param {number} n - Total de elementos
+ * @param {number} s - Quantidade de sucessos
+ * @param {number} c - Quantidade de cancelamentos
+ * @param {number} neutros - Quantidade de neutros
+ * @returns {number} Coeficiente multinomial n! / (s! * c! * neutros!)
+ * @customfunction
+ */
 function combinacaoMultinomial(n, s, c, neutros) {
   return fatorial(n) / (fatorial(s) * fatorial(c) * fatorial(neutros));
 }
 
+/**
+ * Calcula o fatorial de um número.
+ * @param {number} x - Número para calcular o fatorial
+ * @returns {number} Fatorial de x (x!)
+ * @customfunction
+ */
 function fatorial(x) {
   if (x < 0) return 0;
   if (x === 0 || x === 1) return 1;
@@ -81,6 +118,14 @@ function fatorial(x) {
 }
 
 // ==================== SISTEMA 2: APENAS 6 É SUCESSO ====================
+
+/**
+ * Calcula a probabilidade de obter pelo menos X resultados 6 em uma rolagem de dados d6.
+ * @param {number} n - Número de dados a rolar
+ * @param {number} minSucessos - Quantidade mínima de resultados 6 desejados
+ * @returns {number} Probabilidade de sucesso (0 a 1)
+ * @customfunction
+ */
 function probabilidadeSeisSucessos(n, minSucessos) {
   const p = 1 / 6;
   if (minSucessos <= 0) return 1;
@@ -93,32 +138,73 @@ function probabilidadeSeisSucessos(n, minSucessos) {
   return 1 - probAcumulada;
 }
 
+/**
+ * Calcula a probabilidade de não obter nenhum resultado 6 em uma rolagem de dados d6.
+ * @param {number} n - Número de dados a rolar
+ * @returns {number} Probabilidade de zero 6s (0 a 1)
+ * @customfunction
+ */
 function probabilidadeZeroSeis(n) {
   return Math.pow(5 / 6, n);
 }
 
 // ==================== SISTEMA 3: MENOR VALOR COM THRESHOLD ====================
+
+/**
+ * Calcula a probabilidade de todos os dados terem resultado >= threshold (keep lowest sucesso).
+ * @param {number} n - Número de dados a rolar
+ * @param {number} threshold - Valor mínimo para sucesso (2 a 6)
+ * @returns {number} Probabilidade de sucesso (0 a 1)
+ * @customfunction
+ */
 function probabilidadeMenorValorThreshold(n, threshold) {
   let p_sucesso = (7 - threshold) / 6;
   return Math.pow(p_sucesso, n);
 }
 
+/**
+ * Calcula a probabilidade de pelo menos um dado ter resultado < threshold (keep lowest fracasso).
+ * @param {number} n - Número de dados a rolar
+ * @param {number} threshold - Valor mínimo para sucesso (2 a 6)
+ * @returns {number} Probabilidade de fracasso (0 a 1)
+ * @customfunction
+ */
 function probabilidadeMenorValorFracasso(n, threshold) {
   return 1 - probabilidadeMenorValorThreshold(n, threshold);
 }
 
 // ==================== SISTEMA 4: MENOR VALOR APENAS 6 ====================
+
+/**
+ * Calcula a probabilidade de todos os dados terem resultado 6 (keep lowest = 6).
+ * @param {number} n - Número de dados a rolar
+ * @returns {number} Probabilidade de todos serem 6 (0 a 1)
+ * @customfunction
+ */
 function probabilidadeMenorValorTodosSeis(n) {
   let p_seis = 1 / 6;
   return Math.pow(p_seis, n);
 }
 
+/**
+ * Calcula a probabilidade de pelo menos um dado não ter resultado 6 (keep lowest < 6).
+ * @param {number} n - Número de dados a rolar
+ * @returns {number} Probabilidade de fracasso (0 a 1)
+ * @customfunction
+ */
 function probabilidadeMenorValorNaoSeis(n) {
   return 1 - probabilidadeMenorValorTodosSeis(n);
 }
 
 // ==================== SISTEMA 5: MULTI-DADO COM CANCELAMENTO (d6/d8/d10/d12) ====================
 
+/**
+ * Retorna as probabilidades de sucesso, cancelamento e neutro para um dado de N lados.
+ * Sucesso: faces 6 até lados | Cancelamento: face 1 | Neutro: faces 2-5
+ * @param {number} lados - Número de lados do dado (6, 8, 10 ou 12)
+ * @returns {Object} Objeto com probabilidades {sucesso, cancela, neutro}
+ * @customfunction
+ */
 function getProbabilidadesMultiDado(lados) {
   if (![6, 8, 10, 12].includes(lados)) {
     throw new Error("Apenas dados d6, d8, d10 ou d12 são suportados.");
@@ -130,6 +216,16 @@ function getProbabilidadesMultiDado(lados) {
   };
 }
 
+/**
+ * Calcula a probabilidade de obter pelo menos X sucessos líquidos com dados de N lados.
+ * Sucesso: resultado >= 6 | Cancelamento: resultado = 1 | Neutro: 2-5
+ * Sucessos líquidos = max(0, sucessos - cancelamentos)
+ * @param {number} n - Número de dados a rolar
+ * @param {number} lados - Número de lados do dado (6, 8, 10 ou 12)
+ * @param {number} sucessosMinimos - Quantidade mínima de sucessos líquidos desejados
+ * @returns {number} Probabilidade de sucesso (0 a 1)
+ * @customfunction
+ */
 function probabilidadeSucessosMultiDado(n, lados, sucessosMinimos) {
   if (sucessosMinimos <= 0) return 1;
   if (sucessosMinimos > n) return 0;
@@ -158,6 +254,16 @@ function probabilidadeSucessosMultiDado(n, lados, sucessosMinimos) {
   return total;
 }
 
+/**
+ * Calcula a probabilidade de obter exatamente X sucessos líquidos com dados de N lados.
+ * Sucesso: resultado >= 6 | Cancelamento: resultado = 1 | Neutro: 2-5
+ * Sucessos líquidos = max(0, sucessos - cancelamentos)
+ * @param {number} n - Número de dados a rolar
+ * @param {number} lados - Número de lados do dado (6, 8, 10 ou 12)
+ * @param {number} sucessosExatos - Quantidade exata de sucessos líquidos desejados
+ * @returns {number} Probabilidade de obter exatamente esse número de sucessos (0 a 1)
+ * @customfunction
+ */
 function probabilidadeExatosSucessosMultiDado(n, lados, sucessosExatos) {
   if (sucessosExatos < 0 || sucessosExatos > n) return 0;
 
@@ -187,6 +293,12 @@ function probabilidadeExatosSucessosMultiDado(n, lados, sucessosExatos) {
 
 // ==================== SISTEMA 6: MULTI-DADO SEM CANCELAMENTO (d6/d8/d10/d12) ====================
 
+/**
+ * Retorna a probabilidade de sucesso para um dado de N lados (resultado >= 6).
+ * @param {number} lados - Número de lados do dado (6, 8, 10 ou 12)
+ * @returns {number} Probabilidade de sucesso por dado (0 a 1)
+ * @customfunction
+ */
 function getProbSucessoMultiDado(lados) {
   if (![6, 8, 10, 12].includes(lados)) {
     throw new Error("Apenas dados d6, d8, d10 ou d12 são suportados.");
@@ -194,6 +306,15 @@ function getProbSucessoMultiDado(lados) {
   return (lados - 5) / lados;
 }
 
+/**
+ * Calcula a probabilidade de obter pelo menos X sucessos sem cancelamento.
+ * Sucesso: resultado >= 6
+ * @param {number} n - Número de dados a rolar
+ * @param {number} lados - Número de lados do dado (6, 8, 10 ou 12)
+ * @param {number} sucessosMinimos - Quantidade mínima de sucessos desejados
+ * @returns {number} Probabilidade de sucesso (0 a 1)
+ * @customfunction
+ */
 function probabilidadeSucessosSemCancelamento(n, lados, sucessosMinimos) {
   if (sucessosMinimos <= 0) return 1;
   if (n < sucessosMinimos) return 0;
@@ -207,6 +328,15 @@ function probabilidadeSucessosSemCancelamento(n, lados, sucessosMinimos) {
   return 1 - probAcumulada;
 }
 
+/**
+ * Calcula a probabilidade de obter exatamente X sucessos sem cancelamento.
+ * Sucesso: resultado >= 6
+ * @param {number} n - Número de dados a rolar
+ * @param {number} lados - Número de lados do dado (6, 8, 10 ou 12)
+ * @param {number} sucessosExatos - Quantidade exata de sucessos desejados
+ * @returns {number} Probabilidade de obter exatamente esse número de sucessos (0 a 1)
+ * @customfunction
+ */
 function probabilidadeExatosSucessosSemCancelamento(n, lados, sucessosExatos) {
   if (sucessosExatos < 0 || sucessosExatos > n) return 0;
 
@@ -279,10 +409,27 @@ function mediaSucessosMultiDado(n, lados) {
 }
 
 // ==================== FUNÇÕES AUXILIARES ====================
+
+/**
+ * Calcula a função massa de probabilidade binomial P(X = k).
+ * @param {number} k - Número de sucessos
+ * @param {number} n - Número de tentativas
+ * @param {number} p - Probabilidade de sucesso por tentativa
+ * @returns {number} Probabilidade de exatamente k sucessos
+ * @customfunction
+ */
 function binomialPMF(k, n, p) {
   return Math.pow(p, k) * Math.pow(1 - p, n - k) * combinacao(n, k);
 }
 
+/**
+ * Calcula a função distribuição acumulada binomial P(X <= k).
+ * @param {number} k - Número máximo de sucessos
+ * @param {number} n - Número de tentativas
+ * @param {number} p - Probabilidade de sucesso por tentativa
+ * @returns {number} Probabilidade de no máximo k sucessos
+ * @customfunction
+ */
 function binomialCDF(k, n, p) {
   let sum = 0;
   for (let i = 0; i <= k; i++) {
@@ -291,6 +438,13 @@ function binomialCDF(k, n, p) {
   return sum;
 }
 
+/**
+ * Calcula o coeficiente binomial (n choose k).
+ * @param {number} n - Total de elementos
+ * @param {number} k - Elementos a escolher
+ * @returns {number} Coeficiente binomial C(n,k)
+ * @customfunction
+ */
 function combinacao(n, k) {
   if (k < 0 || k > n) return 0;
   if (k === 0 || k === n) return 1;
